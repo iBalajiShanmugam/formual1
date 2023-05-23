@@ -4,6 +4,19 @@
 
 # COMMAND ----------
 
+dbutils.widgets.text('p_data_source', '')
+v_data_source = dbutils.widgets.get('p_data_source')
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/common_functions"
+
+# COMMAND ----------
+
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 # COMMAND ----------
@@ -24,7 +37,7 @@ pit_stops_schema = StructType(
 
 pit_stops_df = spark.read \
     .schema(pit_stops_schema) \
-    .json('/mnt/formula1dldataset/raw/pit_stops.json', multiLine=True) 
+    .json(f'{raw_folder_path}/pit_stops.json', multiLine=True) 
     
 
 # COMMAND ----------
@@ -34,13 +47,14 @@ pit_stops_df = spark.read \
 
 # COMMAND ----------
 
-from pyspark.sql.functions import current_timestamp
+from pyspark.sql.functions import current_timestamp, lit
 
 # COMMAND ----------
 
-pit_stops_final_df = pit_stops_df.withColumnRenamed('raceId', 'race_id') \
-    .withColumnRenamed('driverId', 'driver_id') \
-    .withColumn('ingestion_date', current_timestamp())
+pit_stops_final_df = add_ingestion_date(pit_stops_df.withColumnRenamed('raceId', 'race_id')
+    .withColumnRenamed('driverId', 'driver_id')) \
+    .withColumn('data_source', lit(v_data_source))
+
 
 # COMMAND ----------
 
@@ -49,4 +63,8 @@ pit_stops_final_df = pit_stops_df.withColumnRenamed('raceId', 'race_id') \
 
 # COMMAND ----------
 
-pit_stops_final_df.write.mode('overwrite').parquet('/mnt/formula1dldataset/processed/pit_stops')
+pit_stops_final_df.write.mode('overwrite').parquet(f'{processed_folder_path}/pit_stops')
+
+# COMMAND ----------
+
+dbutils.notebook.exit('Success')

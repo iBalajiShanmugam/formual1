@@ -4,6 +4,19 @@
 
 # COMMAND ----------
 
+dbutils.widgets.text('p_data_source', '')
+v_data_source = dbutils.widgets.get('p_data_source')
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/common_functions"
+
+# COMMAND ----------
+
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 # COMMAND ----------
@@ -26,7 +39,7 @@ qualifying_schema = StructType(
 
 qualifying_df = spark.read \
     .schema(qualifying_schema) \
-    .json('/mnt/formula1dldataset/raw/qualifying', multiLine=True) 
+    .json(f'{raw_folder_path}/qualifying', multiLine=True) 
     
 
 # COMMAND ----------
@@ -36,15 +49,15 @@ qualifying_df = spark.read \
 
 # COMMAND ----------
 
-from pyspark.sql.functions import current_timestamp
+from pyspark.sql.functions import current_timestamp, lit
 
 # COMMAND ----------
 
-qualifying_final_df = qualifying_df.withColumnRenamed('qualifyId', 'qualify_id') \
+qualifying_final_df = add_ingestion_date(qualifying_df.withColumnRenamed('qualifyId', 'qualify_id') \
     .withColumnRenamed('raceId', 'race_id') \
     .withColumnRenamed('driverId', 'driver_id') \
-    .withColumnRenamed('constructorId', 'constructor_id') \
-    .withColumn('ingestion_date', current_timestamp())
+    .withColumnRenamed('constructorId', 'constructor_id')) \
+    .withColumn('data_source', lit(v_data_source))
 
 # COMMAND ----------
 
@@ -53,8 +66,8 @@ qualifying_final_df = qualifying_df.withColumnRenamed('qualifyId', 'qualify_id')
 
 # COMMAND ----------
 
-qualifying_final_df.write.mode('overwrite').parquet('/mnt/formula1dldataset/processed/qualifying')
+qualifying_final_df.write.mode('overwrite').parquet(f'{processed_folder_path}/qualifying')
 
 # COMMAND ----------
 
-
+dbutils.notebook.exit('Success')

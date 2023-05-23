@@ -4,6 +4,19 @@
 
 # COMMAND ----------
 
+dbutils.widgets.text('p_data_source', '')
+v_data_source = dbutils.widgets.get('p_data_source')
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/common_functions"
+
+# COMMAND ----------
+
 from pyspark.sql.types import StructType, StructField, StringType, IntegerType
 
 # COMMAND ----------
@@ -24,7 +37,7 @@ laptime_schema = StructType(
 
 lap_times_df = spark.read \
     .schema(laptime_schema) \
-    .csv('/mnt/formula1dldataset/raw/lap_times') 
+    .csv(f'{raw_folder_path}/lap_times') 
     
 
 # COMMAND ----------
@@ -34,13 +47,14 @@ lap_times_df = spark.read \
 
 # COMMAND ----------
 
-from pyspark.sql.functions import current_timestamp
+from pyspark.sql.functions import current_timestamp, lit
 
 # COMMAND ----------
 
-lap_times_final_df = lap_times_df.withColumnRenamed('raceId', 'race_id') \
-    .withColumnRenamed('driverId', 'driver_id') \
-    .withColumn('ingestion_date', current_timestamp())
+lap_times_final_df = add_ingestion_date(lap_times_df.withColumnRenamed('raceId', 'race_id') \
+    .withColumnRenamed('driverId', 'driver_id')) \
+    .withColumn('data_source', lit(v_data_source))
+
 
 # COMMAND ----------
 
@@ -49,8 +63,8 @@ lap_times_final_df = lap_times_df.withColumnRenamed('raceId', 'race_id') \
 
 # COMMAND ----------
 
-lap_times_final_df.write.mode('overwrite').parquet('/mnt/formula1dldataset/processed/lap_times')
+lap_times_final_df.write.mode('overwrite').parquet(f'{processed_folder_path}/lap_times')
 
 # COMMAND ----------
 
-
+dbutils.notebook.exit('Success')

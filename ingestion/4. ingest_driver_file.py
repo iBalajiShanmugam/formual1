@@ -4,6 +4,19 @@
 
 # COMMAND ----------
 
+dbutils.widgets.text('p_data_source', '')
+v_data_source = dbutils.widgets.get('p_data_source')
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/common_functions"
+
+# COMMAND ----------
+
 # MAGIC %md
 # MAGIC ####Step 1: Read the JSON file using spark dataframe reader api
 
@@ -37,7 +50,7 @@ driver_schema = StructType(
 # COMMAND ----------
 
 drivers_df = spark.read \
-    .json('/mnt/formula1dldataset/raw/drivers.json', schema =driver_schema )
+    .json(f'{raw_folder_path}/drivers.json', schema =driver_schema )
 
 # COMMAND ----------
 
@@ -56,8 +69,12 @@ from pyspark.sql.functions import current_timestamp, concat, lit
 
 drivers_renamed_df = drivers_df.withColumnRenamed('driverId', 'driver_id') \
     .withColumnRenamed('driverRef','driver_ref') \
-    .withColumn('ingestion_date', current_timestamp()) \
-    .withColumn('name', concat(drivers_df.name.forename,lit(' '), drivers_df.name.surname))
+    .withColumn('name', concat(drivers_df.name.forename,lit(' '), drivers_df.name.surname)) \
+    .withColumn('data_source', lit(v_data_source))
+
+# COMMAND ----------
+
+drivers_ingestion_df = add_ingestion_date(drivers_renamed_df)
 
 # COMMAND ----------
 
@@ -66,7 +83,7 @@ drivers_renamed_df = drivers_df.withColumnRenamed('driverId', 'driver_id') \
 
 # COMMAND ----------
 
-drivers_final_df = drivers_renamed_df.drop('url')
+drivers_final_df = drivers_ingestion_df.drop('url')
 
 # COMMAND ----------
 
@@ -75,8 +92,8 @@ drivers_final_df = drivers_renamed_df.drop('url')
 
 # COMMAND ----------
 
-drivers_final_df.write.mode('overwrite').parquet('/mnt/formula1dldataset/processed/drivers')
+drivers_final_df.write.mode('overwrite').parquet(f'{processed_folder_path}/drivers')
 
 # COMMAND ----------
 
-
+dbutils.notebook.exit('Success')

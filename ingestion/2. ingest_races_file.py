@@ -4,6 +4,19 @@
 
 # COMMAND ----------
 
+dbutils.widgets.text('p_data_source', '')
+v_data_source = dbutils.widgets.get('p_data_source')
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/configuration"
+
+# COMMAND ----------
+
+# MAGIC %run "../includes/common_functions"
+
+# COMMAND ----------
+
 from pyspark.sql.types import StructField, StructType, StringType, IntegerType, DateType
 
 # COMMAND ----------
@@ -23,7 +36,7 @@ races_schema = StructType(
 
 # COMMAND ----------
 
-races_df = spark.read.csv('/mnt/formula1dldataset/raw/races.csv', schema=races_schema, header=True)
+races_df = spark.read.csv(f"{raw_folder_path}/races.csv", schema=races_schema, header=True)
 
 # COMMAND ----------
 
@@ -36,8 +49,12 @@ from pyspark.sql.functions import current_timestamp, to_timestamp, concat, lit, 
 
 # COMMAND ----------
 
-races_with_time_stamp = races_df.withColumn('ingestion_date', current_timestamp())\
-    .withColumn('race_timestamp', to_timestamp(concat(col('date'),lit(' '),col('time')), 'yyyy-MM-dd HH:mm:ss') )
+races_with_time_stamp = races_df.withColumn('race_timestamp', to_timestamp(concat(col('date'),lit(' '),col('time')), 'yyyy-MM-dd HH:mm:ss') ) \
+    .withColumn('data_source', lit(v_data_source))
+
+# COMMAND ----------
+
+races_with_ingestion_date = add_ingestion_date(races_with_time_stamp)
 
 # COMMAND ----------
 
@@ -46,7 +63,7 @@ races_with_time_stamp = races_df.withColumn('ingestion_date', current_timestamp(
 
 # COMMAND ----------
 
-races_selected_df = races_with_time_stamp.select(
+races_selected_df = races_with_ingestion_date.select(
     col('raceId').alias('race_id'),
     col('year').alias('race_year'),
     col('round'),
@@ -65,8 +82,8 @@ races_selected_df = races_with_time_stamp.select(
 
 races_selected_df.write.mode('overwrite') \
     .partitionBy('race_year') \
-    .parquet('/mnt/formula1dldataset/processed/races')
+    .parquet(f'{processed_folder_path}/races')
 
 # COMMAND ----------
 
-
+dbutils.notebook.exit('Success')
