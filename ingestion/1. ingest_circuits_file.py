@@ -159,7 +159,8 @@ from pyspark.sql.functions import lit
 
 # COMMAND ----------
 
-circuits_renamed_df = circuits_selected_df.withColumnRenamed("circuitsId", "circute_id") \
+circuits_renamed_df = circuits_selected_df.withColumnRenamed("circuitsId", "circuit_id") \
+    .withColumnRenamed("circuitRef", "circuit_ref") \
     .withColumnRenamed("lat", "latitude") \
     .withColumnRenamed("lng", "longitude") \
     .withColumnRenamed("alt", "altitude") \
@@ -173,7 +174,7 @@ circuits_renamed_df = circuits_selected_df.withColumnRenamed("circuitsId", "circ
 
 # COMMAND ----------
 
-circuits_final_df = add_ingestion_date(circuits_selected_df)
+circuits_final_df = add_ingestion_date(circuits_renamed_df)
 
 # COMMAND ----------
 
