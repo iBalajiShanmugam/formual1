@@ -79,7 +79,11 @@ final_df = race_result_df.select(
 
 # COMMAND ----------
 
-display(final_df.filter("race_year = 2020 and race_name = 'Abu Dhabi Grand Prix'").orderBy(final_df.points.desc()))
+display(final_df)
+
+# COMMAND ----------
+
+display(dbutils.fs.ls('dbfs:/mnt/formula1dldataset/presentaion/race_resuts'))
 
 # COMMAND ----------
 
