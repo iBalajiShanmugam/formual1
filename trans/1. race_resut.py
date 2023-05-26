@@ -73,7 +73,8 @@ final_df = race_result_df.select(
     'grid',
     'fastest_lap',
     'race_time',
-    'points'
+    'points',
+    'position'
 ).withColumn('created_date', current_timestamp())
 
 # COMMAND ----------
