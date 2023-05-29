@@ -33,8 +33,4 @@ display(final_df)
 
 # COMMAND ----------
 
-final_df.write.mode('overwrite').parquet(f'{presentation_folder_path}/driver_standings')
-
-# COMMAND ----------
-
-
+final_df.write.mode('overwrite').format('parquet').saveAsTable('f1_presentation.driver_standings')
