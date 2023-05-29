@@ -83,11 +83,7 @@ display(final_df)
 
 # COMMAND ----------
 
-display(dbutils.fs.ls('dbfs:/mnt/formula1dldataset/presentaion/race_resuts'))
-
-# COMMAND ----------
-
-final_df.write.mode('overwrite').parquet(f'{presentation_folder_path}/race_resuts')
+final_df.write.mode('overwrite').parquet(f'{presentation_folder_path}/race_results')
 
 # COMMAND ----------
 

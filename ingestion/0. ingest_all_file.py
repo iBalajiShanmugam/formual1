@@ -3,6 +3,7 @@ import concurrent.futures
 
 # List of child notebook paths
 child_notebook_paths = [
+    "9. create_processed_database",
     "1. ingest_circuits_file",
     "2. ingest_races_file",
     "3. ingest_constructors_json_file",

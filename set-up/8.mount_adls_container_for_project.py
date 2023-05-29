@@ -41,3 +41,11 @@ mount_adls('formula1dldataset','presentation')
 # COMMAND ----------
 
 mount_adls('formula1dldataset','processed')
+
+# COMMAND ----------
+
+mount_adls('formula1dldataset','demo')
+
+# COMMAND ----------
+
+

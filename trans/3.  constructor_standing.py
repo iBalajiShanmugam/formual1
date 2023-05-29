@@ -3,7 +3,7 @@
 
 # COMMAND ----------
 
-race_result_df = spark.read.parquet(f'{presentation_folder_path}/race_resuts')
+race_result_df = spark.read.parquet(f'{presentation_folder_path}/race_results')
 
 # COMMAND ----------
 

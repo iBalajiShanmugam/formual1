@@ -80,9 +80,7 @@ races_selected_df = races_with_ingestion_date.select(
 
 # COMMAND ----------
 
-races_selected_df.write.mode('overwrite') \
-    .partitionBy('race_year') \
-    .parquet(f'{processed_folder_path}/races')
+races_selected_df.write.mode('overwrite').partitionBy('race_year').format('parquet').saveAsTable('f1_processed.races')
 
 # COMMAND ----------
 
