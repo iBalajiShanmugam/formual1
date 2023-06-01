@@ -63,6 +63,10 @@ pit_stops_final_df = add_ingestion_date(pit_stops_df.withColumnRenamed('raceId',
 
 # COMMAND ----------
 
+overwrite_partition(pit_stops_final_df, 'f1_processed','pit_stops', 'race_id')
+
+# COMMAND ----------
+
 pit_stops_final_df.write.mode('overwrite').format('parquet').saveAsTable('f1_processed.pit_stops')
 
 # COMMAND ----------

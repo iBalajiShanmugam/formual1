@@ -9,6 +9,11 @@ v_data_source = dbutils.widgets.get('p_data_source')
 
 # COMMAND ----------
 
+dbutils.widgets.text('p_file_date', '2021-03-21')
+v_file_date = dbutils.widgets.get('p_file_date')
+
+# COMMAND ----------
+
 # MAGIC %run "../includes/configuration"
 
 # COMMAND ----------
@@ -50,7 +55,7 @@ driver_schema = StructType(
 # COMMAND ----------
 
 drivers_df = spark.read \
-    .json(f'{raw_folder_path}/drivers.json', schema =driver_schema )
+    .json(f'{raw_folder_path}/{v_file_date}/drivers.json', schema =driver_schema )
 
 # COMMAND ----------
 
@@ -70,7 +75,9 @@ from pyspark.sql.functions import current_timestamp, concat, lit
 drivers_renamed_df = drivers_df.withColumnRenamed('driverId', 'driver_id') \
     .withColumnRenamed('driverRef','driver_ref') \
     .withColumn('name', concat(drivers_df.name.forename,lit(' '), drivers_df.name.surname)) \
-    .withColumn('data_source', lit(v_data_source))
+    .withColumn('data_source', lit(v_data_source)) \
+    .withColumn('file_date', lit(v_file_date)) 
+        
 
 # COMMAND ----------
 
